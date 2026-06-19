@@ -4,3 +4,5 @@ dist/
 *.db
 backend/out.txt
 backend/err.txt
+
+backend/service-account.json
