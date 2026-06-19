@@ -20,13 +20,17 @@ export function initFirebase() {
   const serviceAccountPath = path.join(__dirname, 'service-account.json');
 
   try {
-    if (fs.existsSync(serviceAccountPath)) {
+    // Try environment variable first (for Render/production)
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      initializeApp({ credential: cert(serviceAccount) });
+      console.log('Firebase Admin initialized from env var');
+    } else if (fs.existsSync(serviceAccountPath)) {
       const content = fs.readFileSync(serviceAccountPath, 'utf-8');
       const serviceAccount = JSON.parse(content);
-      // Only use if it has a real private key (not placeholder)
       if (serviceAccount.private_key && !serviceAccount.private_key.includes('YOUR_PRIVATE_KEY')) {
         initializeApp({ credential: cert(serviceAccount) });
-        console.log('Firebase Admin initialized with service account');
+        console.log('Firebase Admin initialized with service account file');
       } else {
         throw new Error('Placeholder service account detected');
       }
